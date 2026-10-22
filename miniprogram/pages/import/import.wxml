@@ -1,0 +1,174 @@
+<view class="page import">
+
+  <!-- ========== 1. 选择来源 ========== -->
+  <block wx:if="{{step === 1}}">
+    <view class="head">
+      <view class="head__title">把单词表变成闯关关卡</view>
+      <view class="head__sub">自动识别英文与中文释义，并按文件中的原始顺序保存</view>
+    </view>
+
+    <view class="src-list">
+      <view class="src-card press" bindtap="chooseFile">
+        <view class="src-card__icon src-card__icon--xls">
+          <text class="src-card__ext">XLS</text>
+        </view>
+        <view class="flex-1">
+          <view class="src-card__title">选择文件导入</view>
+          <view class="src-card__sub">从微信聊天记录或手机文件中选取</view>
+        </view>
+        <text class="chev">›</text>
+      </view>
+
+      <view class="src-card press" bindtap="openPaste">
+        <view class="src-card__icon src-card__icon--txt">
+          <text class="src-card__ext">TXT</text>
+        </view>
+        <view class="flex-1">
+          <view class="src-card__title">粘贴文本导入</view>
+          <view class="src-card__sub">直接把单词表复制粘贴进来，最稳妥</view>
+        </view>
+        <text class="chev">›</text>
+      </view>
+    </view>
+
+    <view class="err-box" wx:if="{{error}}">
+      <view class="err-box__title">解析失败</view>
+      <view class="err-box__text">{{error}}</view>
+      <view class="err-box__btn" bindtap="openPaste">改用粘贴文本</view>
+    </view>
+
+    <view class="tips card">
+      <view class="tips__title">支持的格式</view>
+      <view class="fmt-grid">
+        <view class="fmt"><text class="fmt__k">.xlsx</text><text class="fmt__v">两列单词表</text></view>
+        <view class="fmt"><text class="fmt__k">.docx</text><text class="fmt__v">表格或逐行</text></view>
+        <view class="fmt"><text class="fmt__k">.pdf</text><text class="fmt__v">带文字的 PDF</text></view>
+        <view class="fmt"><text class="fmt__k">.txt</text><text class="fmt__v">纯文本 / CSV</text></view>
+      </view>
+      <view class="tips__note">
+        识别规则：每行一个词条，英文在前、中文释义在后，例如
+        <text class="tips__code">personal  adj. 私人的</text>
+        识别后可以逐条校对再保存。
+      </view>
+    </view>
+  </block>
+
+  <!-- ========== 2. 解析中 ========== -->
+  <block wx:if="{{step === 2}}">
+    <view class="loading">
+      <view class="loading__ring"></view>
+      <view class="loading__text">{{loadingText}}</view>
+      <view class="loading__bar">
+        <view class="loading__fill" style="width:{{progress}}%"></view>
+      </view>
+      <view class="loading__sub">文件越大耗时越久，请稍等</view>
+    </view>
+  </block>
+
+  <!-- ========== 3. 预览校对 ========== -->
+  <block wx:if="{{step === 3}}">
+    <view class="pv-head">
+      <view class="pv-head__file ellipsis">{{source.fileName}}</view>
+      <view class="pv-head__count">
+        识别到 <text class="pv-head__num">{{words.length}}</text> 个单词
+        <text class="pv-head__skip" wx:if="{{skippedCount > 0}}">（跳过 {{skippedCount}} 行无效内容）</text>
+      </view>
+    </view>
+
+    <view class="name-field">
+      <text class="name-field__label">词库名称</text>
+      <input
+        class="name-field__input"
+        value="{{bookName}}"
+        bindinput="onNameInput"
+        placeholder="给词库起个名字"
+        maxlength="24"
+      />
+    </view>
+
+    <view class="list-head">
+      <text class="list-head__idx">#</text>
+      <text class="list-head__en">英文</text>
+      <text class="list-head__cn">中文释义</text>
+      <text class="list-head__op"></text>
+    </view>
+
+    <scroll-view scroll-y class="pv-list" bindscrolltolower="onListScrollToLower" enhanced>
+      <block wx:for="{{words}}" wx:key="en">
+        <view
+          class="pv-row"
+          wx:if="{{index < showCount}}"
+          data-index="{{index}}"
+          bindtap="openEdit"
+          hover-class="pv-row--press"
+        >
+          <text class="pv-row__idx">{{index + 1}}</text>
+          <text class="pv-row__en">{{item.en}}</text>
+          <text class="pv-row__cn">{{item.cn}}</text>
+          <view class="pv-row__del" catchtap="removeWord" data-index="{{index}}">
+            <text class="pv-row__del-x">×</text>
+          </view>
+        </view>
+      </block>
+
+      <view class="pv-more" wx:if="{{showCount < words.length}}">上滑加载更多…</view>
+      <view class="pv-add" bindtap="addWord">
+        <text class="pv-add__plus">＋</text>
+        <text>手动添加一条</text>
+      </view>
+      <view class="pv-tip">点击任意一行可修改；保存后按此顺序生成批次</view>
+    </scroll-view>
+
+    <view class="foot">
+      <view class="btn btn-plain foot__back" bindtap="back">重新选择</view>
+      <view class="btn btn-primary foot__save" bindtap="save">保存并开始</view>
+    </view>
+  </block>
+
+  <!-- ========== 4. 粘贴文本 ========== -->
+  <block wx:if="{{step === 4}}">
+    <view class="head">
+      <view class="head__title">粘贴单词表</view>
+      <view class="head__sub">从 PDF、网页、聊天记录里复制文字，粘贴到下面</view>
+    </view>
+
+    <textarea
+      class="paste-box"
+      value="{{pasteText}}"
+      bindinput="onPasteInput"
+      placeholder="personal  adj. 私人的&#10;tie  v. 系，联系&#10;offer  v. 提供"
+      placeholder-class="paste-ph"
+      maxlength="-1"
+      auto-height="{{false}}"
+      show-confirm-bar="{{false}}"
+    ></textarea>
+
+    <view class="err-box" wx:if="{{error}}">
+      <view class="err-box__text">{{error}}</view>
+    </view>
+
+    <view class="foot">
+      <view class="btn btn-plain foot__back" bindtap="back">返回</view>
+      <view class="btn btn-primary foot__save" bindtap="confirmPaste">开始识别</view>
+    </view>
+  </block>
+
+  <!-- ========== 编辑弹层 ========== -->
+  <view class="sheet-mask" wx:if="{{editing}}" bindtap="closeEdit"></view>
+  <view class="sheet {{editing ? 'sheet--open' : ''}}" wx:if="{{editing}}">
+    <view class="sheet__handle"></view>
+    <view class="sheet__title">修改词条</view>
+    <view class="sheet__field">
+      <text class="sheet__label">英文</text>
+      <input class="sheet__input" value="{{editEn}}" bindinput="onEditEn" placeholder="word" />
+    </view>
+    <view class="sheet__field">
+      <text class="sheet__label">中文</text>
+      <input class="sheet__input" value="{{editCn}}" bindinput="onEditCn" placeholder="n. 释义" />
+    </view>
+    <view class="sheet__btns">
+      <view class="btn btn-plain sheet__btn" bindtap="closeEdit">取消</view>
+      <view class="btn btn-primary sheet__btn" bindtap="saveEdit">保存</view>
+    </view>
+  </view>
+</view>

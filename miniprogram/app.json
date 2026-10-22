@@ -1,0 +1,21 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/import/import",
+    "pages/book/book",
+    "pages/game/game",
+    "pages/review/review",
+    "pages/data/data"
+  ],
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#F5F7FB",
+    "navigationBarTitleText": "单词消消乐",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#F5F7FB"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents",
+  "__usePrivacyCheck__": true
+}

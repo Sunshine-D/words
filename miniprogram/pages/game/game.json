@@ -1,0 +1,8 @@
+{
+  "navigationStyle": "custom",
+  "disableScroll": true,
+  "backgroundColor": "#F5F7FB",
+  "usingComponents": {
+    "word-card": "/components/word-card/word-card"
+  }
+}

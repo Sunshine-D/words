@@ -1,0 +1,490 @@
+.game {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f5f7fb;
+  overflow: hidden;
+}
+
+/* ---------- 导航 ---------- */
+.gnav-wrap {
+  background: #f5f7fb;
+  flex-shrink: 0;
+}
+
+.gnav {
+  display: flex;
+  align-items: center;
+  padding: 0 24rpx;
+}
+
+.gnav__back {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.gnav__back--press {
+  background: #e9eefa;
+}
+
+.gnav__back-icon {
+  font-size: 48rpx;
+  color: #16203a;
+  line-height: 1;
+  transform: translateY(-3rpx);
+}
+
+.gnav__center {
+  flex: 1;
+  min-width: 0;
+  padding: 0 16rpx;
+}
+
+.gnav__title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #16203a;
+  line-height: 1.25;
+}
+
+.gnav__sub {
+  margin-top: 4rpx;
+  font-size: 20rpx;
+  color: #9aa5bc;
+}
+
+/* 倒计时胶囊 */
+.gtimer {
+  display: flex;
+  align-items: center;
+  height: 60rpx;
+  padding: 0 22rpx;
+  border-radius: 999rpx;
+  background: #ffffff;
+  box-shadow: 0 4rpx 14rpx rgba(35, 53, 96, 0.08);
+  flex-shrink: 0;
+}
+
+.gtimer__dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #16b364;
+  margin-right: 10rpx;
+}
+
+.gtimer__text {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #16203a;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.5rpx;
+}
+
+.gtimer--free .gtimer__dot {
+  background: #3d6bff;
+}
+
+.gtimer--free .gtimer__text {
+  font-size: 22rpx;
+  color: #6b7794;
+}
+
+.gtimer--urgent {
+  background: #f04438;
+  box-shadow: 0 4rpx 16rpx rgba(240, 68, 56, 0.35);
+  animation: gtimer-pulse 1s ease-in-out infinite;
+}
+
+.gtimer--urgent .gtimer__dot {
+  background: #ffffff;
+}
+
+.gtimer--urgent .gtimer__text {
+  color: #ffffff;
+}
+
+@keyframes gtimer-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+/* ---------- 进度 ---------- */
+.gbar {
+  display: flex;
+  align-items: center;
+  padding: 18rpx 32rpx 14rpx;
+  flex-shrink: 0;
+}
+
+.gbar__track {
+  flex: 1;
+  height: 12rpx;
+  border-radius: 999rpx;
+  background: #e6ecf7;
+  overflow: hidden;
+  margin-right: 18rpx;
+}
+
+.gbar__fill {
+  height: 100%;
+  border-radius: 999rpx;
+  background: linear-gradient(90deg, #5fe0a4, #16b364);
+  transition: width 0.28s ease;
+}
+
+.gbar__text {
+  font-size: 22rpx;
+  color: #8b97b0;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+/* ---------- 棋盘 ---------- */
+.board {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  padding: 0 12rpx 14rpx;
+}
+
+.board--side {
+  flex-direction: row;
+}
+
+.board--stack {
+  flex-direction: column;
+}
+
+/* 用 margin 代替 flex gap，兼容低版本安卓 WebView */
+.board--side .panel + .panel {
+  margin-left: 12rpx;
+}
+
+.board--stack .panel + .panel {
+  margin-top: 12rpx;
+}
+
+.panel {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 24rpx;
+  padding: 8rpx;
+  box-shadow: 0 8rpx 30rpx rgba(35, 53, 96, 0.06);
+}
+
+.panel__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4rpx 8rpx 8rpx;
+  flex-shrink: 0;
+}
+
+.panel__title {
+  font-size: 21rpx;
+  font-weight: 600;
+  color: #6b7794;
+}
+
+.panel__hint {
+  font-size: 18rpx;
+  color: #c3cbdb;
+  letter-spacing: 1rpx;
+}
+
+.panel__grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  /* 行高均分可用空间；卡片自身限制最大高度，避免被拉成极窄的长条 */
+  grid-auto-rows: minmax(96rpx, 1fr);
+  align-items: center;
+  align-content: stretch;
+  gap: 8rpx;
+}
+
+/* ---------- 连击 ---------- */
+.combo {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 34%;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.combo__text {
+  padding: 14rpx 34rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 197, 61, 0.96);
+  color: #7a4a00;
+  font-size: 30rpx;
+  font-weight: 700;
+  box-shadow: 0 12rpx 30rpx rgba(255, 180, 40, 0.4);
+  animation: combo-pop 0.36s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+@keyframes combo-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.6) translateY(20rpx);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ---------- 结算 ---------- */
+.rmask {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: rgba(12, 20, 36, 0.56);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 0 60rpx;
+}
+
+.rcard {
+  width: 100%;
+  max-width: 600rpx;
+  background: #ffffff;
+  border-radius: 40rpx;
+  padding: 52rpx 40rpx 40rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 30rpx 80rpx rgba(10, 20, 40, 0.28);
+}
+
+.rcard__badge {
+  width: 124rpx;
+  height: 124rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 26rpx;
+}
+
+.rcard__badge--win {
+  background: linear-gradient(135deg, #ffe9a8, #ffc53d);
+  box-shadow: 0 12rpx 30rpx rgba(255, 197, 61, 0.4);
+}
+
+.rcard__badge--lose {
+  background: linear-gradient(135deg, #ffe0dc, #ffb4ac);
+  box-shadow: 0 12rpx 30rpx rgba(240, 68, 56, 0.24);
+}
+
+.rcard__badge-text {
+  font-size: 60rpx;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.rcard__badge--win .rcard__badge-text {
+  color: #ffffff;
+}
+
+.rcard__badge--lose .rcard__badge-text {
+  color: #ffffff;
+}
+
+.rcard__title {
+  font-size: 42rpx;
+  font-weight: 700;
+  letter-spacing: -0.5rpx;
+}
+
+.rcard__title.is-win {
+  color: #16b364;
+}
+
+.rcard__title.is-lose {
+  color: #f04438;
+}
+
+.rcard__sub {
+  margin-top: 14rpx;
+  font-size: 28rpx;
+  color: #4a5670;
+}
+
+.rstars {
+  margin-top: 20rpx;
+}
+
+.rstars__text {
+  font-size: 40rpx;
+  color: #ffc53d;
+  letter-spacing: 8rpx;
+}
+
+.rstats {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin-top: 34rpx;
+  padding: 24rpx 0;
+  background: #f7f9fd;
+  border-radius: 24rpx;
+}
+
+.rstat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.rstat__num {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #16203a;
+  font-variant-numeric: tabular-nums;
+}
+
+.rstat__label {
+  margin-top: 8rpx;
+  font-size: 21rpx;
+  color: #9aa5bc;
+}
+
+.rstat__split {
+  width: 1rpx;
+  height: 44rpx;
+  background: #e6ecf7;
+}
+
+.rbtns {
+  display: flex;
+  width: 100%;
+  margin-top: 36rpx;
+}
+
+.rbtns__item {
+  flex: 1;
+}
+
+.rbtns__item:first-child {
+  margin-right: 18rpx;
+  flex: 0 0 200rpx;
+}
+
+/* 结算：掌握的提示 */
+.rmaster {
+  width: 100%;
+  margin-top: 20rpx;
+  padding: 16rpx 20rpx;
+  background: #eef4ff;
+  border-radius: 16rpx;
+  text-align: center;
+}
+
+.rmaster__text {
+  font-size: 23rpx;
+  color: #3d6bff;
+}
+
+/* 结算：本局错词 */
+.rwrong {
+  width: 100%;
+  margin-top: 24rpx;
+  padding: 20rpx;
+  background: #fff8f1;
+  border: 1rpx solid #ffe2c8;
+  border-radius: 20rpx;
+}
+
+.rwrong__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 14rpx;
+}
+
+.rwrong__title {
+  font-size: 25rpx;
+  font-weight: 600;
+  color: #b4560f;
+}
+
+.rwrong__tip {
+  font-size: 19rpx;
+  color: #c99a66;
+}
+
+.rwrong__list {
+  max-height: 260rpx;
+}
+
+.rwrong__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14rpx 8rpx;
+  border-radius: 12rpx;
+}
+
+.rwrong__item + .rwrong__item {
+  border-top: 1rpx solid #ffe8d4;
+}
+
+.rwrong__item--press {
+  background: #ffefdd;
+}
+
+.rwrong__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+}
+
+.rwrong__en {
+  flex-shrink: 0;
+  font-size: 25rpx;
+  font-weight: 600;
+  color: #16203a;
+  margin-right: 16rpx;
+}
+
+.rwrong__cn {
+  flex: 1;
+  font-size: 21rpx;
+  color: #8a7355;
+}
+
+.rwrong__speaker {
+  flex-shrink: 0;
+  font-size: 26rpx;
+  margin-left: 12rpx;
+}
+
+.is-warn {
+  color: #e8833a;
+}

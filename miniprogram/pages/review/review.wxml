@@ -1,0 +1,62 @@
+<view class="page review">
+  <!-- 概览 -->
+  <view class="rv-hero" wx:if="{{total > 0}}">
+    <view class="rv-hero__num">{{total}}</view>
+    <view class="rv-hero__label">个词还没拿下</view>
+    <view class="rv-hero__tip" wx:if="{{masteredTotal > 0}}">
+      已经攻克了 {{masteredTotal}} 个，继续保持
+    </view>
+  </view>
+
+  <view class="section-head" wx:if="{{total > 0}}">
+    <text class="section-title">按词库复习</text>
+    <text class="t-weak">{{groups.length}} 本</text>
+  </view>
+
+  <view class="rv-list">
+    <view class="rv-card card" wx:for="{{groups}}" wx:key="id">
+      <view class="rv-card__head">
+        <view class="flex-1">
+          <view class="rv-card__name ellipsis">{{item.name}}</view>
+          <view class="rv-card__meta">
+            <text class="rv-card__count">{{item.count}} 个待复习</text>
+            <text wx:if="{{item.mastered > 0}}">· 已掌握 {{item.mastered}}</text>
+          </view>
+        </view>
+        <view
+          class="btn {{item.canReview ? 'btn-primary' : 'btn-disabled'}} rv-card__btn"
+          data-id="{{item.id}}"
+          bindtap="startReview"
+        >{{item.canReview ? '开始复习' : '满 4 个'}}</view>
+      </view>
+
+      <view class="rv-preview" wx:if="{{item.preview.length > 0}}">
+        <view
+          class="rv-preview__item"
+          wx:for="{{item.preview}}"
+          wx:for-item="w"
+          wx:key="en"
+          data-word="{{w.en}}"
+          bindtap="speakWord"
+          hover-class="rv-preview__item--press"
+        >
+          <text class="rv-preview__en">{{w.en}}</text>
+          <text class="rv-preview__cn ellipsis">{{w.cn}}</text>
+          <text class="rv-preview__times">错{{w.wrong}}次</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty" wx:if="{{loaded && total === 0}}">
+    <view class="empty__circle empty__circle--ok">
+      <text class="empty__icon">✓</text>
+    </view>
+    <view class="empty__title">错词本是空的</view>
+    <view class="empty__desc">闯关时配对错的词会自动收进来，到时候再来攻克它们</view>
+    <view class="btn btn-primary empty__btn" bindtap="goImport">去导入词表</view>
+  </view>
+
+  <view class="foot-tip" wx:if="{{total > 0}}">连续答对 2 次，该词自动移出错词本</view>
+</view>

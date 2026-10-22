@@ -1,0 +1,8 @@
+# 备份压缩包
+*.zip
+
+# WorkBuddy 私有目录中的临时产物
+.workbuddy/shot.png
+
+# 依赖
+node_modules/

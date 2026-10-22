@@ -1,0 +1,242 @@
+<view class="page book" wx:if="{{book}}">
+
+  <!-- 词库概览 -->
+  <view class="bk-hero">
+    <view class="bk-hero__name">{{book.name}}</view>
+    <view class="bk-hero__meta">{{book.count}} 个单词 · 共 {{totalBatches}} 批</view>
+
+    <view class="bk-hero__bar">
+      <view class="bk-hero__bar-inner" style="width:{{percent}}%"></view>
+    </view>
+    <view class="bk-hero__foot">
+      <text>已完成 {{doneBatches}} / {{totalBatches}} 批</text>
+      <text class="bk-hero__pct">{{percent}}%</text>
+    </view>
+
+    <view class="btn bk-hero__btn" bindtap="startNext">{{startLabel}}</view>
+  </view>
+
+  <!-- 错词本 -->
+  <view class="section-head">
+    <text class="section-title">错词本</text>
+    <text class="t-weak" wx:if="{{masteredCount > 0}}">已掌握 {{masteredCount}} 个</text>
+  </view>
+
+  <view class="wrong-card card">
+    <view class="wrong-card__head">
+      <view class="wrong-card__badge">{{wrongCount}}</view>
+      <view class="flex-1">
+        <view class="wrong-card__title">
+          {{wrongCount > 0 ? '有 ' + wrongCount + ' 个词还没拿下' : '错词本是空的'}}
+        </view>
+        <view class="wrong-card__sub">
+          {{wrongCount > 0 ? '配对错了会自动收进来，连续答对 2 次就毕业' : '闯关时配对错的词会出现在这里'}}
+        </view>
+      </view>
+    </view>
+
+    <view class="wrong-preview" wx:if="{{wrongCount > 0}}">
+      <view
+        class="wrong-preview__item"
+        wx:for="{{wrongPreview}}"
+        wx:key="en"
+        data-word="{{item.en}}"
+        bindtap="speakWord"
+        hover-class="wrong-preview__item--press"
+      >
+        <text class="wrong-preview__en">{{item.en}}</text>
+        <text class="wrong-preview__cn ellipsis">{{item.cn}}</text>
+        <text class="wrong-preview__times">错{{item.wrong}}次</text>
+      </view>
+    </view>
+
+    <view class="wrong-card__btns">
+      <view class="btn btn-plain wrong-card__btn" bindtap="clearWrongBook">清空</view>
+      <view class="btn {{wrongCount >= 4 ? 'btn-primary' : 'btn-disabled'}} wrong-card__btn" bindtap="startReview">
+        {{wrongCount >= 4 ? '复习错词' : '满 4 个可复习'}}
+      </view>
+    </view>
+  </view>
+
+  <!-- 学习设置 -->
+  <view class="section-head">
+    <text class="section-title">学习设置</text>
+    <text class="t-weak">修改后立即生效</text>
+  </view>
+
+  <view class="set-card card">
+    <!-- 每批数量 -->
+    <view class="set-row">
+      <view class="set-row__main">
+        <view class="set-row__label">每批单词数</view>
+        <view class="set-row__hint">决定一局出现多少个单词</view>
+      </view>
+      <view class="stepper">
+        <view class="stepper__btn" bindtap="decBatch">−</view>
+        <text class="stepper__val">{{settings.batchSize}}</text>
+        <view class="stepper__btn" bindtap="incBatch">＋</view>
+      </view>
+    </view>
+    <view class="chip-row chip-row--tight">
+      <view class="chip {{settings.batchSize === 6 ? 'chip--on' : ''}}" data-size="6" bindtap="pickSize">6 个</view>
+      <view class="chip {{settings.batchSize === 9 ? 'chip--on' : ''}}" data-size="9" bindtap="pickSize">9 个</view>
+      <view class="chip {{settings.batchSize === 12 ? 'chip--on' : ''}}" data-size="12" bindtap="pickSize">12 个</view>
+    </view>
+
+    <view class="set-divider"></view>
+
+    <!-- 取词方式 -->
+    <view class="set-row">
+      <view class="set-row__main">
+        <view class="set-row__label">取词方式</view>
+        <view class="set-row__hint">{{modeTip}}</view>
+      </view>
+      <view class="seg">
+        <view
+          class="seg__item {{settings.batchMode === 'sequential' ? 'seg__item--on' : ''}}"
+          data-mode="sequential"
+          bindtap="pickMode"
+        >顺序</view>
+        <view
+          class="seg__item {{settings.batchMode === 'random' ? 'seg__item--on' : ''}}"
+          data-mode="random"
+          bindtap="pickMode"
+        >随机</view>
+      </view>
+    </view>
+
+    <view class="set-divider"></view>
+
+    <!-- 限时 -->
+    <view class="set-row">
+      <view class="set-row__main">
+        <view class="set-row__label">每批限时</view>
+        <view class="set-row__hint">当前：{{timeLimitLabel}}</view>
+      </view>
+    </view>
+    <view class="chip-row">
+      <view class="chip {{settings.timeLimit === 0 ? 'chip--on' : ''}}" data-time="0" bindtap="pickTime">自动</view>
+      <view class="chip {{settings.timeLimit === 30 ? 'chip--on' : ''}}" data-time="30" bindtap="pickTime">30 秒</view>
+      <view class="chip {{settings.timeLimit === 60 ? 'chip--on' : ''}}" data-time="60" bindtap="pickTime">60 秒</view>
+      <view class="chip {{settings.timeLimit === 120 ? 'chip--on' : ''}}" data-time="120" bindtap="pickTime">2 分钟</view>
+      <view class="chip {{settings.timeLimit === -1 ? 'chip--on' : ''}}" data-time="-1" bindtap="pickTime">不限</view>
+    </view>
+
+    <view class="set-divider"></view>
+
+    <!-- 布局 -->
+    <view class="set-row">
+      <view class="set-row__main">
+        <view class="set-row__label">屏幕布局</view>
+        <view class="set-row__hint">左右分栏更像"连线"，上下分栏字更大</view>
+      </view>
+      <view class="seg">
+        <view
+          class="seg__item {{settings.layout === 'side' ? 'seg__item--on' : ''}}"
+          data-layout="side"
+          bindtap="pickLayout"
+        >左右</view>
+        <view
+          class="seg__item {{settings.layout === 'stack' ? 'seg__item--on' : ''}}"
+          data-layout="stack"
+          bindtap="pickLayout"
+        >上下</view>
+      </view>
+    </view>
+
+    <view class="set-divider"></view>
+
+    <!-- 发音 -->
+    <view class="set-row">
+      <view class="set-row__main">
+        <view class="set-row__label">点击单词发音</view>
+        <view class="set-row__hint">选中英文卡片时自动朗读</view>
+      </view>
+      <switch checked="{{settings.tts}}" bindchange="toggleTts" color="#3D6BFF" />
+    </view>
+
+    <view class="chip-row chip-row--tight" wx:if="{{settings.tts}}">
+      <view class="chip {{settings.accent === 1 ? 'chip--on' : ''}}" data-accent="1" bindtap="pickAccent">英音</view>
+      <view class="chip {{settings.accent === 2 ? 'chip--on' : ''}}" data-accent="2" bindtap="pickAccent">美音</view>
+    </view>
+
+    <view class="set-divider"></view>
+
+    <!-- 每日目标 -->
+    <view class="set-row">
+      <view class="set-row__main">
+        <view class="set-row__label">每日目标</view>
+        <view class="set-row__hint">现在每天 {{settings.dailyGoal}} 个单词</view>
+      </view>
+    </view>
+    <view class="chip-row">
+      <view
+        class="chip {{settings.dailyGoal === item ? 'chip--on' : ''}}"
+        wx:for="{{goalOptions}}"
+        wx:key="*this"
+        data-goal="{{item}}"
+        bindtap="pickGoal"
+      >{{item}} 个</view>
+    </view>
+  </view>
+
+  <!-- 批次 -->
+  <view class="section-head">
+    <text class="section-title">{{settings.batchMode === 'sequential' ? '批次列表' : '随机闯关'}}</text>
+    <text class="t-weak" wx:if="{{settings.batchMode === 'sequential'}}">共 {{totalBatches}} 批</text>
+  </view>
+
+  <block wx:if="{{settings.batchMode === 'sequential'}}">
+    <scroll-view scroll-x class="batch-scroll" enhanced show-scrollbar="{{false}}">
+      <view class="batch-track">
+        <view
+          class="batch batch--{{item.status}}"
+          wx:for="{{batches}}"
+          wx:key="index"
+          data-index="{{item.index}}"
+          bindtap="startBatch"
+        >
+          <text class="batch__no">{{item.index + 1}}</text>
+          <text class="batch__range">{{item.label}}</text>
+          <view class="batch__flag" wx:if="{{item.status === 'done'}}">✓</view>
+        </view>
+      </view>
+    </scroll-view>
+    <view class="batch-tip">点击任意批次从那里开始；通关后自动解锁下一批</view>
+  </block>
+
+  <block wx:else>
+    <view class="random-card card press" bindtap="startNext">
+      <view class="random-card__badge">
+        <text class="random-card__dice">?</text>
+      </view>
+      <view class="flex-1">
+        <view class="random-card__title">随机抽 {{settings.batchSize}} 个单词</view>
+        <view class="random-card__sub">优先抽还没练过的，练完一轮自动重置</view>
+      </view>
+    </view>
+  </block>
+
+  <!-- 单词表 -->
+  <view class="section-head">
+    <text class="section-title">单词表</text>
+    <text class="link" bindtap="toggleWords">
+      {{wordsExpanded ? '收起' : '查看全部 ' + totalWords}}
+    </text>
+  </view>
+
+  <view class="word-list card" wx:if="{{wordsExpanded}}">
+    <scroll-view scroll-y style="max-height: 720rpx" bindscrolltolower="onWordScroll" enhanced>
+      <view class="wrow" wx:for="{{words}}" wx:key="id">
+        <text class="wrow__no">{{item.no}}</text>
+        <text class="wrow__en">{{item.en}}</text>
+        <text class="wrow__cn">{{item.cn}}</text>
+      </view>
+      <view class="wrow__more" wx:if="{{loadedWords < totalWords}}">上滑加载更多…</view>
+      <view class="wrow__end" wx:else>共 {{totalWords}} 个单词</view>
+    </scroll-view>
+  </view>
+
+  <!-- 危险操作 -->
+  <view class="danger" bindtap="removeBook">删除这个词库</view>
+</view>

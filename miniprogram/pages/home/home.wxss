@@ -1,0 +1,361 @@
+.home {
+  padding-bottom: 80rpx;
+}
+
+/* ---------- 顶部渐变区 ---------- */
+.hero {
+  margin: 0 -32rpx;
+  padding: 20rpx 40rpx 150rpx;
+  background: linear-gradient(150deg, #5b86ff 0%, #3d6bff 45%, #6a5bff 100%);
+  border-radius: 0 0 44rpx 44rpx;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  right: -80rpx;
+  top: -60rpx;
+  width: 320rpx;
+  height: 320rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.hero__greet {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.78);
+  letter-spacing: 0.5rpx;
+}
+
+.hero__title {
+  margin-top: 10rpx;
+  font-size: 44rpx;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.5rpx;
+}
+
+.hero__stats {
+  display: flex;
+  align-items: center;
+  margin-top: 40rpx;
+  padding: 26rpx 0;
+  border-radius: 28rpx;
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(10rpx);
+}
+
+/* ---------- 每日目标 ---------- */
+.goal {
+  position: relative;
+  z-index: 2;
+  margin-top: 28rpx;
+}
+
+.goal__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12rpx;
+}
+
+.goal__label {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.goal__pct {
+  font-size: 22rpx;
+  font-weight: 600;
+  color: #fff;
+}
+
+.goal__track {
+  height: 12rpx;
+  border-radius: 6rpx;
+  background: rgba(255, 255, 255, 0.24);
+  overflow: hidden;
+}
+
+.goal__fill {
+  height: 100%;
+  border-radius: 6rpx;
+  background: #ffffff;
+  transition: width 0.35s ease;
+}
+
+/* ---------- 近 7 天日历 ---------- */
+.cal {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30rpx;
+}
+
+.cal__day {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cal__dot {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 14rpx;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.cal__dot--lv1 {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.cal__dot--lv2 {
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.cal__dot--lv3 {
+  background: #ffffff;
+}
+
+.cal__dot--off {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.cal__day--today .cal__dot {
+  box-shadow: 0 0 0 4rpx rgba(255, 255, 255, 0.35);
+}
+
+.cal__label {
+  margin-top: 10rpx;
+  font-size: 19rpx;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ---------- 错词本入口 ---------- */
+.wrong-bar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  margin: -110rpx 0 20rpx;
+  padding: 26rpx 28rpx;
+  background: #fffaf4;
+  border: 1rpx solid #ffe2c8;
+  border-radius: 26rpx;
+  box-shadow: 0 10rpx 30rpx rgba(35, 53, 96, 0.08);
+}
+
+.wrong-bar__icon {
+  flex-shrink: 0;
+  width: 68rpx;
+  height: 68rpx;
+  margin-right: 22rpx;
+  border-radius: 20rpx;
+  background: #ff8a3d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wrong-bar__num {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #fff;
+}
+
+.wrong-bar__title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #16203a;
+}
+
+.wrong-bar__desc {
+  margin-top: 6rpx;
+  font-size: 21rpx;
+  color: #a08a70;
+}
+
+.hstat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hstat__num {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.hstat__label {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.hstat__split {
+  width: 1rpx;
+  height: 44rpx;
+  background: rgba(255, 255, 255, 0.24);
+}
+
+/* ---------- 导入入口 ---------- */
+.import-bar {
+  position: relative;
+  z-index: 2;
+  margin-top: -110rpx;
+  padding: 26rpx 28rpx;
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border-radius: 30rpx;
+  box-shadow: 0 16rpx 44rpx rgba(35, 53, 96, 0.14);
+}
+
+/* 错词卡片已经上浮占位，导入卡片顺延 */
+.import-bar--stacked {
+  margin-top: 20rpx;
+}
+
+.import-bar__icon {
+  width: 84rpx;
+  height: 84rpx;
+  border-radius: 24rpx;
+  background: linear-gradient(135deg, #eaf0ff, #dfe8ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 22rpx;
+}
+
+.import-bar__plus {
+  font-size: 44rpx;
+  font-weight: 300;
+  color: #3d6bff;
+  line-height: 1;
+  transform: translateY(-2rpx);
+}
+
+.import-bar__title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #16203a;
+}
+
+.import-bar__desc {
+  margin-top: 6rpx;
+  font-size: 23rpx;
+  color: #8b97b0;
+}
+
+.chev {
+  font-size: 40rpx;
+  color: #c3cbdb;
+  margin-left: 12rpx;
+  line-height: 1;
+}
+
+/* ---------- 词库卡 ---------- */
+.book-list {
+  display: block;
+}
+
+.book-card {
+  padding: 28rpx;
+  margin-bottom: 24rpx;
+}
+
+.book-card__head {
+  display: flex;
+  align-items: center;
+}
+
+.book-card__badge {
+  width: 84rpx;
+  height: 84rpx;
+  border-radius: 24rpx;
+  background: linear-gradient(135deg, #6d8dff, #4a63e8);
+  color: #fff;
+  font-size: 34rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 22rpx;
+  flex-shrink: 0;
+}
+
+.book-card__info {
+  padding-right: 16rpx;
+}
+
+.book-card__name {
+  font-size: 31rpx;
+  font-weight: 600;
+  color: #16203a;
+}
+
+.book-card__meta {
+  margin-top: 8rpx;
+  font-size: 23rpx;
+  color: #9aa5bc;
+  display: flex;
+  align-items: center;
+}
+
+.dot {
+  margin: 0 10rpx;
+  color: #ccd4e4;
+}
+
+.book-card__play {
+  width: 76rpx;
+  height: 76rpx;
+  border-radius: 50%;
+  background: #eaf0ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.book-card__play:active {
+  background: #dbe5ff;
+  transform: scale(0.94);
+}
+
+.play-tri {
+  width: 0;
+  height: 0;
+  border-left: 20rpx solid #3d6bff;
+  border-top: 13rpx solid transparent;
+  border-bottom: 13rpx solid transparent;
+  margin-left: 6rpx;
+}
+
+.book-card__bar {
+  margin-top: 26rpx;
+}
+
+.book-card__foot {
+  margin-top: 14rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.book-card__pct {
+  font-size: 23rpx;
+  color: #3d6bff;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 空状态与页脚提示已提升为全局样式，见 app.wxss */

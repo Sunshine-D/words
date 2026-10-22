@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "单词消消乐",
+  "navigationBarBackgroundColor": "#F5F7FB",
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "dark"
+}

@@ -1,0 +1,142 @@
+<view class="game">
+  <!-- 自定义导航 -->
+  <view class="gnav-wrap" style="padding-top:{{statusBarHeight}}px">
+    <view class="gnav" style="height:{{navBarHeight}}px">
+      <view class="gnav__back" bindtap="goBack" hover-class="gnav__back--press">
+        <text class="gnav__back-icon">‹</text>
+      </view>
+      <view class="gnav__center">
+        <view class="gnav__title ellipsis">{{bookName}}</view>
+        <view class="gnav__sub">{{batchLabel}}</view>
+      </view>
+      <view class="gtimer {{urgent ? 'gtimer--urgent' : ''}} {{unlimited ? 'gtimer--free' : ''}}">
+        <view class="gtimer__dot"></view>
+        <text class="gtimer__text">{{timeText}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 进度 -->
+  <view class="gbar">
+    <view class="gbar__track">
+      <view class="gbar__fill" style="width:{{matchPercent}}%"></view>
+    </view>
+    <text class="gbar__text">{{matched}} / {{total}}</text>
+  </view>
+
+  <!-- 棋盘 -->
+  <view class="board board--{{layout}}">
+    <view class="panel">
+      <view class="panel__head">
+        <text class="panel__title">英文</text>
+        <text class="panel__hint">EN</text>
+      </view>
+      <view class="panel__grid">
+        <word-card
+          wx:for="{{enCards}}"
+          wx:key="key"
+          text="{{item.text}}"
+          wkey="{{item.key}}"
+          state="{{item.state}}"
+          variant="en"
+          bind:select="onPick"
+        />
+      </view>
+    </view>
+
+    <view class="panel">
+      <view class="panel__head">
+        <text class="panel__title">中文</text>
+        <text class="panel__hint">CN</text>
+      </view>
+      <view class="panel__grid">
+        <word-card
+          wx:for="{{cnCards}}"
+          wx:key="key"
+          text="{{item.text}}"
+          wkey="{{item.key}}"
+          state="{{item.state}}"
+          variant="cn"
+          bind:select="onPick"
+        />
+      </view>
+    </view>
+  </view>
+
+  <!-- 连击 -->
+  <view class="combo {{showCombo ? 'combo--on' : ''}}" wx:if="{{showCombo}}">
+    <text class="combo__text">连击 ×{{combo}}</text>
+  </view>
+
+  <!-- 结算 -->
+  <view class="rmask" wx:if="{{showResult}}">
+    <view class="rcard pop-in">
+      <view class="rcard__badge {{win ? 'rcard__badge--win' : 'rcard__badge--lose'}}">
+        <text class="rcard__badge-text">{{win ? '★' : '!'}}</text>
+      </view>
+
+      <view class="rcard__title {{win ? 'is-win' : 'is-lose'}}">
+        {{win ? '全部匹配完成' : '闯关失败'}}
+      </view>
+      <view class="rcard__sub">
+        {{win ? '通关胜利，我真棒！' : '时间到啦，再试一次吧'}}
+      </view>
+
+      <view class="rstars" wx:if="{{win}}">
+        <text class="rstars__text">{{starsText}}</text>
+      </view>
+
+      <view class="rstats">
+        <view class="rstat">
+          <text class="rstat__num">{{usedText}}</text>
+          <text class="rstat__label">用时</text>
+        </view>
+        <view class="rstat__split"></view>
+        <view class="rstat">
+          <text class="rstat__num">{{matched}}/{{total}}</text>
+          <text class="rstat__label">已匹配</text>
+        </view>
+        <view class="rstat__split"></view>
+        <view class="rstat">
+          <text class="rstat__num {{wrongCount > 0 ? 'is-warn' : ''}}">{{wrongCount}}</text>
+          <text class="rstat__label">错词</text>
+        </view>
+      </view>
+
+      <view class="rmaster" wx:if="{{mode === 'review' && masteredCount > 0}}">
+        <text class="rmaster__text">本局有 {{masteredCount}} 个词被判定为已掌握</text>
+      </view>
+
+      <!-- 本局错词，可点读 -->
+      <view class="rwrong" wx:if="{{wrongCount > 0}}">
+        <view class="rwrong__head">
+          <text class="rwrong__title">本局错词</text>
+          <text class="rwrong__tip">已加入错词本，点击可朗读</text>
+        </view>
+        <scroll-view scroll-y class="rwrong__list">
+          <view
+            class="rwrong__item"
+            wx:for="{{wrongWords}}"
+            wx:key="en"
+            data-word="{{item.en}}"
+            bindtap="speakWord"
+            hover-class="rwrong__item--press"
+          >
+            <view class="rwrong__main">
+              <text class="rwrong__en">{{item.en}}</text>
+              <text class="rwrong__cn ellipsis">{{item.cn}}</text>
+            </view>
+            <text class="rwrong__speaker">🔊</text>
+          </view>
+        </scroll-view>
+      </view>
+
+      <view class="rbtns">
+        <view class="btn btn-plain rbtns__item" bindtap="goBack">返回</view>
+        <view class="btn btn-primary rbtns__item" bindtap="nextBatch">
+          {{win ? (mode === 'review' ? '继续复习' : '下一批') : '再试一次'}}
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

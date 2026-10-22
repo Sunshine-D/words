@@ -1,0 +1,150 @@
+/* 自定义组件宿主节点作为 grid cell，需要撑满格子并让卡片在其中垂直居中 */
+:host {
+  display: flex;
+  align-items: center;
+  min-height: 0;
+}
+
+.wc {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-height: 200rpx;
+  min-height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10rpx 6rpx;
+  border-radius: 16rpx;
+  background: #ffffff;
+  border: 2rpx solid transparent;
+  box-shadow: 0 4rpx 12rpx rgba(30, 45, 80, 0.07);
+  transition: transform 0.16s ease, background 0.16s ease,
+    border-color 0.16s ease, box-shadow 0.16s ease, opacity 0.2s ease;
+  overflow: hidden;
+}
+
+.wc__text {
+  width: 100%;
+  text-align: center;
+  line-height: 1.32;
+  word-break: break-word;
+  color: #16203a;
+  transition: color 0.16s ease;
+}
+
+/* ---------- 变体排版 ---------- */
+.wc--en .wc__text {
+  font-weight: 600;
+  letter-spacing: -0.3rpx;
+  font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+}
+
+.wc--cn .wc__text {
+  color: #3c465e;
+}
+
+.size-lg.wc--en .wc__text {
+  font-size: 26rpx;
+}
+.size-md.wc--en .wc__text {
+  font-size: 23rpx;
+}
+.size-sm.wc--en .wc__text {
+  font-size: 20rpx;
+}
+
+.size-lg.wc--cn .wc__text {
+  font-size: 23rpx;
+}
+.size-md.wc--cn .wc__text {
+  font-size: 20rpx;
+}
+.size-sm.wc--cn .wc__text {
+  font-size: 18rpx;
+  line-height: 1.28;
+}
+
+.size-xs.wc--cn .wc__text {
+  font-size: 16rpx;
+  line-height: 1.22;
+}
+
+/* ---------- 状态 ---------- */
+.wc--press {
+  transform: scale(0.94);
+  box-shadow: 0 2rpx 6rpx rgba(30, 45, 80, 0.1);
+}
+
+.is-selected {
+  background: #eaf0ff;
+  border-color: #3d6bff;
+  box-shadow: 0 8rpx 20rpx rgba(61, 107, 255, 0.24);
+  transform: translateY(-2rpx);
+}
+
+.is-selected .wc__text {
+  color: #2b54dd;
+  font-weight: 600;
+}
+
+.is-matched {
+  background: #e6f8ef;
+  border-color: #b7ebcd;
+  box-shadow: none;
+  opacity: 0.72;
+}
+
+.is-matched .wc__text {
+  color: #5fae86;
+}
+
+.is-wrong {
+  background: #feecea;
+  border-color: #f04438;
+  animation: wc-shake 0.34s ease;
+}
+
+.is-wrong .wc__text {
+  color: #d33a2f;
+}
+
+@keyframes wc-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6rpx);
+  }
+  40% {
+    transform: translateX(6rpx);
+  }
+  60% {
+    transform: translateX(-4rpx);
+  }
+  80% {
+    transform: translateX(3rpx);
+  }
+}
+
+/* ---------- 匹配角标 ---------- */
+.wc__tick {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 28rpx;
+  height: 28rpx;
+  background: #16b364;
+  border-radius: 0 14rpx 0 14rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wc__tick-icon {
+  font-size: 18rpx;
+  color: #fff;
+  line-height: 1;
+  transform: translateY(-1rpx);
+}

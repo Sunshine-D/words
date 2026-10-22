@@ -1,0 +1,11 @@
+<view
+  class="wc wc--{{variant}} is-{{state}} size-{{sizeClass}}"
+  bindtap="onTap"
+  hover-class="{{disabled ? '' : 'wc--press'}}"
+  hover-stay-time="60"
+>
+  <text class="wc__text">{{text}}</text>
+  <view class="wc__tick" wx:if="{{state === 'matched'}}">
+    <text class="wc__tick-icon">✓</text>
+  </view>
+</view>

@@ -1,0 +1,121 @@
+<view class="page home">
+  <!-- 顶部区域 -->
+  <view class="hero">
+    <view class="hero__greet">{{greeting}}，同学</view>
+    <view class="hero__title">把单词和释义，配成对吧</view>
+
+    <view class="hero__stats">
+      <view class="hstat">
+        <text class="hstat__num">{{stats.today}}</text>
+        <text class="hstat__label">今日消除</text>
+      </view>
+      <view class="hstat__split"></view>
+      <view class="hstat">
+        <text class="hstat__num">{{stats.streak}}</text>
+        <text class="hstat__label">连续天数</text>
+      </view>
+      <view class="hstat__split"></view>
+      <view class="hstat">
+        <text class="hstat__num">{{stats.total}}</text>
+        <text class="hstat__label">累计消除</text>
+      </view>
+    </view>
+
+    <!-- 每日目标 -->
+    <view class="goal">
+      <view class="goal__top">
+        <text class="goal__label">今日目标 {{stats.goal}} 个</text>
+        <text class="goal__pct">{{stats.goalDone ? '已达成 🎉' : stats.goalPercent + '%'}}</text>
+      </view>
+      <view class="goal__track">
+        <view class="goal__fill" style="width:{{stats.goalPercent}}%"></view>
+      </view>
+    </view>
+
+    <!-- 近 7 天 -->
+    <view class="cal">
+      <view class="cal__day {{item.isToday ? 'cal__day--today' : ''}}" wx:for="{{stats.calendar}}" wx:key="key">
+        <view class="cal__dot cal__dot--lv{{item.level}} {{item.active ? '' : 'cal__dot--off'}}"></view>
+        <text class="cal__label">{{item.label}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 错词本入口 -->
+  <view class="wrong-bar press" wx:if="{{wrongTotal > 0}}" bindtap="goReview">
+    <view class="wrong-bar__icon">
+      <text class="wrong-bar__num">{{wrongTotal}}</text>
+    </view>
+    <view class="flex-1">
+      <view class="wrong-bar__title">错词本待复习</view>
+      <view class="wrong-bar__desc">配对错的词都在这儿，攻克它们</view>
+    </view>
+    <text class="chev">›</text>
+  </view>
+
+  <!-- 导入入口（上浮卡片） -->
+  <view class="import-bar {{wrongTotal > 0 ? 'import-bar--stacked' : ''}} press" bindtap="goImport">
+    <view class="import-bar__icon">
+      <text class="import-bar__plus">＋</text>
+    </view>
+    <view class="flex-1">
+      <view class="import-bar__title">导入我的单词表</view>
+      <view class="import-bar__desc">Excel / Word / PDF / 文本，自动识别单词与释义</view>
+    </view>
+    <text class="chev">›</text>
+  </view>
+
+  <!-- 词库列表 -->
+  <view class="section-head">
+    <text class="section-title">我的词库</text>
+    <text class="t-weak">{{books.length}} 本</text>
+  </view>
+
+  <view class="book-list">
+    <view
+      class="book-card card"
+      wx:for="{{books}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="openBook"
+      hover-class="press"
+      hover-stay-time="60"
+    >
+      <view class="book-card__head">
+        <view class="book-card__badge">{{item.initial}}</view>
+        <view class="flex-1 book-card__info">
+          <view class="book-card__name ellipsis">{{item.name}}</view>
+          <view class="book-card__meta">
+            <text>{{item.count}} 个单词</text>
+            <text class="dot">·</text>
+            <text>{{item.lastText}}</text>
+          </view>
+        </view>
+        <view class="book-card__play" catchtap="quickStart" data-id="{{item.id}}">
+          <view class="play-tri"></view>
+        </view>
+      </view>
+
+      <view class="bar book-card__bar">
+        <view class="bar-inner" style="width:{{item.percent}}%"></view>
+      </view>
+
+      <view class="book-card__foot">
+        <text class="t-weak">已完成 {{item.batchesDone}} / {{item.totalBatches}} 批</text>
+        <text class="book-card__pct">{{item.percent}}%</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty" wx:if="{{loaded && books.length === 0}}">
+    <view class="empty__circle">
+      <text class="empty__icon">Aa</text>
+    </view>
+    <view class="empty__title">还没有词库</view>
+    <view class="empty__desc">把老师发的单词表导进来，立刻开始闯关</view>
+    <view class="btn btn-primary empty__btn" bindtap="goImport">导入第一份词表</view>
+  </view>
+
+  <view class="foot-tip foot-tip--link" bindtap="goData">{{syncTip}}</view>
+</view>

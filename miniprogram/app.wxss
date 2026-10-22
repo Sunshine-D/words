@@ -1,0 +1,305 @@
+/* ============================================================
+   单词消消乐 · 全局样式与设计令牌
+   设计方向：面向在校学生的「轻学习」视觉
+   - 浅底 + 白卡 + 大圆角，降低学习压迫感
+   - 主色蓝紫，状态色（成功绿 / 警示橙 / 失败红）语义明确
+   - 所有交互元素最小点击区 88rpx，符合移动端触控习惯
+   ============================================================ */
+
+page {
+  --brand: #3d6bff;
+  --brand-dark: #2b54dd;
+  --brand-soft: #eaf0ff;
+  --brand-2: #7b8cff;
+  --success: #16b364;
+  --success-soft: #e6f8ef;
+  --warn: #ff8a3d;
+  --warn-soft: #fff3e9;
+  --danger: #f04438;
+  --danger-soft: #feecea;
+  --star: #ffc53d;
+
+  --ink: #16203a;
+  --ink-2: #6b7794;
+  --ink-3: #9aa5bc;
+  --line: #edf1f7;
+  --bg: #f5f7fb;
+  --white: #ffffff;
+
+  --r-lg: 32rpx;
+  --r-md: 24rpx;
+  --r-sm: 16rpx;
+
+  --shadow: 0 8rpx 30rpx rgba(35, 53, 96, 0.06);
+  --shadow-up: 0 12rpx 40rpx rgba(35, 53, 96, 0.12);
+
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 28rpx;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
+    "Helvetica Neue", "Microsoft YaHei", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+view,
+text,
+scroll-view,
+button,
+input,
+textarea {
+  box-sizing: border-box;
+}
+
+/* ---------- 布局 ---------- */
+.page {
+  min-height: 100vh;
+  padding: 0 32rpx calc(48rpx + env(safe-area-inset-bottom));
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+}
+
+.between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-1 {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---------- 文本 ---------- */
+.t-title {
+  font-size: 40rpx;
+  font-weight: 700;
+  letter-spacing: -0.5rpx;
+}
+
+.t-sub {
+  font-size: 26rpx;
+  color: var(--ink-2);
+}
+
+.t-weak {
+  font-size: 24rpx;
+  color: var(--ink-3);
+}
+
+.t-num {
+  font-size: 44rpx;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -1rpx;
+}
+
+.ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* ---------- 卡片 ---------- */
+.card {
+  background: var(--white);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow);
+}
+
+/* ---------- 空状态（多页共用） ---------- */
+.empty {
+  padding: 60rpx 40rpx 40rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.empty__circle {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 10rpx 30rpx rgba(35, 53, 96, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty__icon {
+  font-size: 44rpx;
+  font-weight: 700;
+  color: #c7d3ec;
+}
+
+.empty__title {
+  margin-top: 30rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.empty__desc {
+  margin-top: 12rpx;
+  font-size: 25rpx;
+  color: #9aa5bc;
+  text-align: center;
+}
+
+.empty__btn {
+  margin-top: 40rpx;
+  padding: 0 56rpx;
+}
+
+/* ---------- 页脚提示（多页共用） ---------- */
+.foot-tip {
+  margin-top: 30rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: #b6bfd2;
+}
+
+/* ---------- 禁用态按钮（多页共用） ---------- */
+.btn-disabled {
+  background: #e7ebf3;
+  color: #aeb7c9;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 44rpx 4rpx 22rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+/* ---------- 按钮 ---------- */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 96rpx;
+  padding: 0 40rpx;
+  border-radius: var(--r-md);
+  font-size: 30rpx;
+  font-weight: 600;
+  line-height: 1;
+  border: none;
+  transition: transform 0.12s ease, opacity 0.12s ease;
+}
+
+.btn::after {
+  border: none;
+}
+
+.btn:active {
+  transform: scale(0.97);
+  opacity: 0.9;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #4d76ff 0%, #3d6bff 55%, #5b53ff 100%);
+  color: #fff;
+  box-shadow: 0 10rpx 26rpx rgba(61, 107, 255, 0.28);
+}
+
+.btn-primary[disabled] {
+  background: #c7d2ea;
+  box-shadow: none;
+}
+
+.btn-ghost {
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+
+.btn-plain {
+  background: #fff;
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+
+.btn-sm {
+  height: 68rpx;
+  padding: 0 28rpx;
+  font-size: 26rpx;
+  border-radius: 18rpx;
+}
+
+/* ---------- 标签 ---------- */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  height: 40rpx;
+  padding: 0 14rpx;
+  border-radius: 10rpx;
+  font-size: 22rpx;
+  font-weight: 500;
+  background: var(--brand-soft);
+  color: var(--brand);
+}
+
+.tag-success {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.tag-warn {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.tag-plain {
+  background: #f2f5fa;
+  color: var(--ink-2);
+}
+
+/* ---------- 进度条 ---------- */
+.bar {
+  height: 12rpx;
+  border-radius: 999rpx;
+  background: #eef2f9;
+  overflow: hidden;
+}
+
+.bar-inner {
+  height: 100%;
+  border-radius: 999rpx;
+  background: linear-gradient(90deg, #5b8bff, #3d6bff);
+  transition: width 0.3s ease;
+}
+
+/* ---------- 通用动效 ---------- */
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(12rpx);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.pop-in {
+  animation: pop-in 0.26s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+
+.press {
+  transition: transform 0.12s ease;
+}
+
+.press:active {
+  transform: scale(0.97);
+}
