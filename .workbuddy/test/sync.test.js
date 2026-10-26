@@ -4,7 +4,7 @@
  *   降级路径、模式切换、冲突合并、脏键持久化、离线暂存、storage 钩子
  */
 const path = require('path');
-const base = path.resolve('../../miniprogram/utils');
+const base = path.resolve(__dirname, '../../miniprogram/utils');
 
 /* ---------- 内存云开发桩 ---------- */
 let seq = 1;
