@@ -242,7 +242,7 @@ Page({
     // 写入前先估容量，避免 setStorageSync 抛异常导致白屏
     const needKB = Math.ceil(storage.estimateBytes(words) / 1024);
     const leftKB = storage.quotaKB();
-    if (leftKB > 0 && needKB > leftKB) {
+    if (leftKB >= 0 && needKB > leftKB) {
       wx.showModal({
         title: '本机存储空间不足',
         content:

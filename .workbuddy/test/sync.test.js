@@ -177,7 +177,7 @@ let pullVal = 'notset';
   check('pushBook 不抛异常', cloud.pushBook({ id: 'b1' }, []) instanceof Promise);
   // 默认 auto：没有云就安静地退回本机，cloudOn 必须为 false
   const m = sync.init();
-  check('sync.init 不抛异常且默认 auto', m === 'auto', '实际 ' + m);
+  check('sync.init 不抛异常且默认 local', m === 'local', '实际 ' + m);
   check('无云时 cloudOn 为 false', sync.statusSnapshot().cloudOn === false);
   const b = storage.createBook({ name: '本地词库', words: [{ en: 'a', cn: '啊' }] });
   check('本地模式仍能建词库', !!b);

@@ -100,6 +100,7 @@ function write(key, value) {
   if (size > SINGLE_KEY_LIMIT) {
     setLastError('数据过大（约 ' + Math.round(size / 1024) + 'KB），单条记录不能超过 900KB');
     console.error('[storage] oversize', key, size);
+    if (typeof wx.showToast === 'function') wx.showToast({ title: '数据过大，未能保存', icon: 'none' });
     return false;
   }
   try {
@@ -115,6 +116,7 @@ function write(key, value) {
       setLastError('保存失败：' + (msg || '未知错误'));
     }
     console.error('[storage] write failed', key, e);
+    if (typeof wx.showToast === 'function') wx.showToast({ title: '保存失败，请检查本机空间', icon: 'none' });
     return false;
   }
 }
@@ -123,7 +125,7 @@ function write(key, value) {
 function quotaKB() {
   try {
     const info = wx.getStorageInfoSync();
-    return Math.floor((info.limitSize - info.currentSize) * 1024);
+    return Math.max(0, Math.floor(info.limitSize - info.currentSize));
   } catch (e) {
     return -1;
   }
@@ -150,7 +152,7 @@ function getSettings() {
 
 function saveSettings(patch) {
   const next = Object.assign({}, getSettings(), patch || {});
-  write(KEY.SETTINGS, next);
+  if (!write(KEY.SETTINGS, next)) return null;
   notify('settings');
   return next;
 }
@@ -186,7 +188,7 @@ function updateBook(id, patch) {
   for (let i = 0; i < list.length; i++) {
     if (list[i].id === id) {
       list[i] = Object.assign({}, list[i], patch, { updatedAt: Date.now() });
-      saveBooks(list);
+      if (!saveBooks(list)) return null;
       notify('book:' + id);
       return list[i];
     }
@@ -269,7 +271,7 @@ function deleteBook(id) {
   const list = listBooks().filter(function (b) {
     return b.id !== id;
   });
-  saveBooks(list);
+  if (!saveBooks(list)) return false;
   try {
     wx.removeStorageSync(KEY.WORDS + id);
   } catch (e) {
@@ -282,6 +284,7 @@ function deleteBook(id) {
   }
   // 通知云端同步删除（sync 发现本地已无此书时会走删除分支）
   notify('book:' + id);
+  return true;
 }
 
 /**
@@ -378,7 +381,7 @@ function upsert(bookId, en, cn, patch) {
   }
   Object.assign(hit, patch);
   hit.at = Date.now();
-  saveWrongList(bookId, list);
+  if (!saveWrongList(bookId, list)) return null;
   return hit;
 }
 
@@ -396,7 +399,7 @@ function markWrong(bookId, words) {
       wrong: (findOne(bookId, w.en) ? findOne(bookId, w.en).wrong + 1 : 1),
       right: 0 // 答错清零连续正确
     });
-    touched.push(item);
+    if (item) touched.push(item);
   });
   return touched;
 }
@@ -419,7 +422,7 @@ function markRight(bookId, en) {
   if (!item || item.mastered) return false;
   const right = (item.right || 0) + 1;
   const mastered = right >= MASTER_THRESHOLD;
-  upsert(bookId, item.en, item.cn, { right: right, mastered: mastered });
+  if (!upsert(bookId, item.en, item.cn, { right: right, mastered: mastered })) return false;
   return mastered;
 }
 
@@ -625,7 +628,7 @@ function recordStats(matched, win, seconds) {
   s.days[key] = rollupDay(day);
   rollupStats(s);
 
-  write(KEY.STATS, s);
+  if (!write(KEY.STATS, s)) return null;
   notify('stats');
   return s;
 }
@@ -641,10 +644,10 @@ function recordStats(matched, win, seconds) {
  *
  * @returns {boolean} 本地是否发生变化
  */
-function mergeStats(remote) {
+function mergeStats(remote, requireSuccess) {
   const r = remote || {};
   const rd = r.days || {};
-  if (!Object.keys(rd).length && !r.bestStreak) return false;
+  if (!Object.keys(rd).length && !r.bestStreak) return !!requireSuccess;
 
   const s = getStats();
   const self = getDeviceId();
@@ -693,7 +696,7 @@ function mergeStats(remote) {
     changed = true;
   }
 
-  if (!changed) return false;
+  if (!changed) return !!requireSuccess;
   rollupStats(s);
   return write(KEY.STATS, s);
 }

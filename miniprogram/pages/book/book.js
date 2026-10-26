@@ -129,6 +129,7 @@ Page({
 
   saveSetting(patch) {
     const next = storage.saveSettings(patch);
+    if (!next) return;
     this.setData({ settings: next });
     this.refresh();
   },
@@ -219,7 +220,7 @@ Page({
       confirmColor: '#f04438',
       success(res) {
         if (!res.confirm) return;
-        storage.clearWrong(that.data.bookId);
+        if (!storage.clearWrong(that.data.bookId)) return;
         util.toast('已清空');
         that.refresh();
       }
@@ -290,7 +291,7 @@ Page({
       confirmColor: '#f04438',
       success(res) {
         if (!res.confirm) return;
-        storage.deleteBook(that.data.bookId);
+        if (!storage.deleteBook(that.data.bookId)) return;
         wx.showToast({ title: '已删除', icon: 'success' });
         setTimeout(function () {
           wx.navigateBack();

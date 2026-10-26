@@ -52,7 +52,7 @@ Page({
     const s = sync.statusSnapshot();
     let tip;
     if (s.mode === 'local') {
-      tip = '词库只存在本机，换设备需重新导入 · 切换';
+      tip = '数据保存在本机 · 导出或恢复备份';
     } else if (!s.cloudOn) {
       tip = '云端暂不可用，已存在本机 · 查看';
     } else if (s.status === 'unavailable') {

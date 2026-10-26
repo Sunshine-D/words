@@ -20,14 +20,19 @@ App({
 
   onLaunch() {
     this.initSystemInfo();
+    try {
+      require('./utils/backup').recover();
+    } catch (e) {
+      wx.showModal({ title: '数据恢复未完成', content: e.message || '请释放存储空间后重启', showCancel: false });
+      return;
+    }
     storage.ensureSettings();
     this.globalData.settings = storage.getSettings();
     seed.installIfEmpty();
     this.initPrivacy();
-    // 必须在种子数据之后：否则会把内置示例词库当成"本地新增"推上去
+    // 本地模式初始化；旧版自动同步设置也在这里停用。
     sync.init();
-    // 云端模式下后台补一次同步；本地模式此调用会立即返回
-    sync.bootstrap();
+    // 云端只在数据管理页由用户手动操作，启动不发起云请求。
   },
 
   onShow() {
@@ -71,7 +76,7 @@ App({
       content:
         '感谢你使用单词消消乐。读取本地词表文件前，请先阅读并同意' +
         that.globalData.privacyName +
-        '。我们不会上传你的词表内容。',
+        '。词表默认仅保存在本机；只有主动使用云端备份时才会上传词表和学习记录。',
       confirmText: '同意并继续',
       cancelText: secondTime ? '暂不同意' : '查看指引',
       success(res) {

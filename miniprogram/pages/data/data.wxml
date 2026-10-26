@@ -1,127 +1,16 @@
-<view class="page">
-  <view class="nav" style="padding-top:{{statusBarHeight}}px;height:{{navBarHeight}}px">
-    <view class="nav__back" bindtap="goBack">‹</view>
-    <view class="nav__title">数据与同步</view>
-    <view class="nav__pad"></view>
+<view class="page"><view class="body">
+  <view class="tip tip--info"><text class="tip__t">数据保存在当前设备</text><text class="tip__d">导入、闯关、复习和统计均可离线使用，无需开通云服务。云端仅在你主动操作时连接。</text></view>
+  <view class="section-head"><text class="section-title">本机数据</text><text class="t-weak">已用 {{usedKB}} KB</text></view>
+  <view class="card overview">
+    <view class="ov"><text class="ov__n">{{bookCount}}</text><text class="ov__l">词库</text></view>
+    <view class="ov__split"></view><view class="ov"><text class="ov__n">{{wordCount}}</text><text class="ov__l">单词</text></view>
+    <view class="ov__split"></view><view class="ov"><text class="ov__n">{{wrongCount}}</text><text class="ov__l">错词</text></view>
   </view>
-
-  <view class="body">
-    <!-- 模式选择 -->
-    <view class="section-head">
-      <text class="section-title">存储方式</text>
-      <text class="t-weak">随时可切换</text>
-    </view>
-
-    <view class="modes">
-      <view
-        class="mode {{mode === 'auto' ? 'mode--on' : ''}}"
-        data-mode="auto"
-        bindtap="pickMode"
-        hover-class="mode--press"
-      >
-        <view class="mode__ico mode__ico--cloud">云</view>
-        <view class="mode__name">自动备份<text class="mode__badge">推荐</text></view>
-        <view class="mode__desc">联网时自动备份，换手机、重装都在。断网照样能背，有网后自动补传</view>
-        <view class="mode__flag" wx:if="{{mode === 'auto'}}">当前</view>
-      </view>
-
-      <view
-        class="mode {{mode === 'local' ? 'mode--on' : ''}}"
-        data-mode="local"
-        bindtap="pickMode"
-        hover-class="mode--press"
-      >
-        <view class="mode__ico mode__ico--local">本</view>
-        <view class="mode__name">只存本机</view>
-        <view class="mode__desc">不上传任何数据。换手机或清理微信缓存会丢失</view>
-        <view class="mode__flag" wx:if="{{mode === 'local'}}">当前</view>
-      </view>
-    </view>
-
-    <!-- 同步状态 -->
-    <view class="card stat" wx:if="{{mode === 'auto'}}">
-      <view class="stat__row">
-        <text class="stat__k">状态</text>
-        <text class="stat__v {{status === 'error' || status === 'unavailable' ? 'stat__v--warn' : ''}}">{{statusText}}</text>
-      </view>
-      <view class="stat__row">
-        <text class="stat__k">上次同步</text>
-        <text class="stat__v">{{lastSyncText}}</text>
-      </view>
-      <view class="stat__row" wx:if="{{dirtyCount > 0}}">
-        <text class="stat__k">待同步</text>
-        <text class="stat__v">{{dirtyCount}} 项</text>
-      </view>
-      <view class="stat__row" wx:if="{{cloudReason}}">
-        <text class="stat__k">说明</text>
-        <text class="stat__v stat__v--weak">{{cloudReason}}</text>
-      </view>
-    </view>
-
-    <view class="tip" wx:if="{{envHint}}">
-      <text class="tip__t">{{envHint}}</text>
-      <text class="tip__d">在 utils/cloud.js 顶部填入云环境 ID 后重新编译即可启用</text>
-    </view>
-
-    <view class="tip tip--info" wx:if="{{mode === 'auto' && !envHint}}">
-      <text class="tip__t">断网也能继续背单词</text>
-      <text class="tip__d">联网后会自动补传，不会丢失进度</text>
-    </view>
-
-    <!-- 数据概览 -->
-    <view class="section-head">
-      <text class="section-title">本机数据</text>
-      <text class="t-weak">共 {{usedKB}} KB</text>
-    </view>
-    <view class="card overview">
-      <view class="ov">
-        <text class="ov__n">{{bookCount}}</text>
-        <text class="ov__l">词库</text>
-      </view>
-      <view class="ov__split"></view>
-      <view class="ov">
-        <text class="ov__n">{{wordCount}}</text>
-        <text class="ov__l">单词</text>
-      </view>
-      <view class="ov__split"></view>
-      <view class="ov">
-        <text class="ov__n">{{wrongCount}}</text>
-        <text class="ov__l">错词</text>
-      </view>
-    </view>
-
-    <!-- 操作 -->
-    <view class="ops" wx:if="{{mode === 'auto'}}">
-      <view class="btn btn-plain ops__item" bindtap="syncNow">{{busy ? '处理中…' : '立即同步'}}</view>
-      <view class="btn btn-danger ops__item" bindtap="clearCloud">删除云端数据</view>
-    </view>
-
-    <view class="foot-tip">微信 Storage 上限 10MB，当前用量远低于上限</view>
-  </view>
-
-  <!-- 确认 / 冲突弹窗 -->
-  <view class="mask" wx:if="{{confirmShow}}" bindtap="closeConfirm">
-    <view class="sheet" catchtap="noop">
-      <view class="sheet__title">{{confirmTitle}}</view>
-      <view class="sheet__desc">{{confirmDesc}}</view>
-
-      <view class="pick" wx:if="{{conflictData}}">
-        <view class="pick__item" bindtap="useLocal">
-          <text class="pick__n">以本机为准</text>
-          <text class="pick__d">{{confirmLocal}} 个词库，覆盖云端</text>
-        </view>
-        <view class="pick__item" bindtap="useCloud">
-          <text class="pick__n">以云端为准</text>
-          <text class="pick__d">{{confirmCloud}} 个词库，覆盖本机</text>
-        </view>
-      </view>
-
-      <view class="sheet__btns">
-        <view class="btn btn-plain sheet__btn" bindtap="closeConfirm">取消</view>
-        <view class="btn btn-primary sheet__btn" bindtap="onConfirmOk">
-          {{conflictData ? '两边都保留' : '确定'}}
-        </view>
-      </view>
-    </view>
-  </view>
-</view>
+  <view class="section-head"><text class="section-title">文件备份</text><text class="t-weak">无需云服务</text></view>
+  <view class="tip"><text class="tip__t">请定期导出重要数据</text><text class="tip__d">删除小程序或清理微信数据可能导致本地记录丢失。导出 JSON 文件后，请通过微信分享保存；换设备时可从聊天文件恢复。</text></view>
+  <view class="ops"><button class="btn btn-primary ops__item" disabled="{{busy}}" bindtap="exportFile">导出备份</button><button class="btn btn-plain ops__item" disabled="{{busy}}" bindtap="importFile">恢复文件</button></view>
+  <view class="section-head"><text class="section-title">云端辅助备份</text><text class="t-weak">可选 · 手动操作</text></view>
+  <view class="tip tip--info"><text class="tip__d">需运营方已配置云服务。不会自动上传，也不影响免费学习；云端不可用时请使用文件备份。此处恢复新版手动备份。</text></view>
+  <view class="ops"><button class="btn btn-plain ops__item" disabled="{{busy}}" bindtap="cloudBackup">备份到云端</button><button class="btn btn-plain ops__item" disabled="{{busy}}" bindtap="cloudRestore">从云端恢复</button></view>
+  <view class="foot-tip" wx:if="{{busy}}">正在处理，请保持页面打开…</view>
+</view></view>

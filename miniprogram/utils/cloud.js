@@ -513,7 +513,36 @@ function clearAll() {
     });
 }
 
+// 手动整包备份。独立记录，不与旧版自动同步数据混写。
+function saveBackup(backup) {
+  if (!init()) return Promise.reject(new Error(getFailReason() || '云端不可用'));
+  if (require('./storage').estimateBytes(backup) > 900 * 1024) {
+    return Promise.reject(new Error('云备份暂限 900KB，请使用文件备份'));
+  }
+  const c = coll(COLL.SETTINGS);
+  if (!c) return Promise.reject(new Error('云端不可用'));
+  // 读取失败必须停止，不能误判为空后新增重复备份。
+  return c.where({ key: 'backup-v1' }).limit(1).get().then(function (res) {
+    const hit = res.data && res.data[0];
+    const data = { key: 'backup-v1', backup: backup, updatedAt: Date.now() };
+    return hit ? c.doc(hit._id).update({ data: data }) : c.add({ data: data });
+  });
+}
+
+function loadBackup() {
+  if (!init()) return Promise.reject(new Error(getFailReason() || '云端不可用'));
+  const c = coll(COLL.SETTINGS);
+  if (!c) return Promise.reject(new Error('云端不可用'));
+  return c.where({ key: 'backup-v1' }).limit(1).get().then(function (res) {
+    const hit = res.data && res.data[0];
+    if (!hit || !hit.backup) throw new Error('云端还没有手动备份，请先使用文件备份或在原设备备份');
+    return hit.backup;
+  });
+}
+
 module.exports = {
+  saveBackup: saveBackup,
+  loadBackup: loadBackup,
   CLOUD_ENV: CLOUD_ENV,
   COLL: COLL,
   init: init,

@@ -1,21 +1,7 @@
 /**
- * 同步引擎（本地优先 + 云端双向同步）
- *
- * 为什么这样设计：
- * 业务代码里 25 处 storage 调用**全是同步的**，如果改成异步接口要动所有页面。
- * 所以约定：**读永远走本地（同步，业务零感知），写先落本地、再异步推云**。
- * 好处是断网照样能背单词，联网后自动补推，不会出现"转圈等网络"。
- *
- * 冲突解决按数据性质分三种，不能一刀切：
- * - 词库（含词表）：整体版本，以 updatedAt 较新者为准
- * - 错词本：逐词合并（wrong 取 max，right 取更近的一次）
- * - 统计：按「日期 → 设备」分桶合并，汇总值由明细求和得出
- * 后两者都是计数器，整对象覆盖会丢数据或在反复同步中数值膨胀。
- *
- * 脏键（dirty）会持久化：改动后还没推成功就关掉小程序，下次启动继续推，不丢数据。
- *
- * 模式：auto（默认，有云就同步、没云自动落本机）/ local（始终仅本机）。
- * 不让学生去理解「云端是什么」，默认 auto 即可。
+ * 当前产品默认仅本机保存：init 不初始化云 SDK，启动不执行 bootstrap。
+ * 自动同步接口保留兼容旧数据层和测试；生产页面不调用 enableCloud。
+ * 新版文件与手动云备份由 backup.js、cloud.saveBackup/loadBackup 负责。
  */
 const cloud = require('./cloud');
 
@@ -26,7 +12,7 @@ const KEY_LAST = 'wm_sync_last';
 
 const DEBOUNCE = 900; // 防抖窗口，合并短时间内的连续改动
 
-let mode = 'auto';
+let mode = 'local';
 let cloudReady = false; // 云是否真的可用（init 成功），auto 模式下靠它决定行为
 let dirty = null;
 let timer = null;
@@ -142,37 +128,11 @@ function getMode() {
 }
 
 function init() {
-  try {
-    const v = wx.getStorageSync(KEY_MODE);
-    // 只有显式选过「仅本机」才是 local；旧版本存的 'cloud' 归并到 auto
-    mode = v === 'local' ? 'local' : 'auto';
-  } catch (e) {
-    mode = 'auto';
-  }
-  try {
-    const t = wx.getStorageSync(KEY_LAST);
-    lastSyncAt = typeof t === 'number' ? t : 0;
-  } catch (e) {
-    lastSyncAt = 0;
-  }
-  loadDirty();
-
-  if (mode === 'local') {
-    cloudReady = false;
-    setStatus('off');
-    return mode;
-  }
-
-  // auto：能连上云就同步，连不上就安静地退回本机，不给用户制造焦虑
-  cloudReady = cloud.init();
-  if (!cloudReady) {
-    setStatus('unavailable', cloud.getFailReason());
-    watchNetwork();
-    return mode;
-  }
-  setStatus('idle');
-  watchNetwork();
-  schedule(true);
+  // 升级后也停用旧版自动同步；保留云端数据供用户主动恢复。
+  mode = 'local';
+  cloudReady = false;
+  writeObj(KEY_MODE, 'local');
+  setStatus('off');
   return mode;
 }
 

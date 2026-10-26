@@ -1,264 +1,68 @@
 const storage = require('../../utils/storage');
-const sync = require('../../utils/sync');
+const backup = require('../../utils/backup');
 const cloud = require('../../utils/cloud');
 const util = require('../../utils/util');
-const audio = require('../../utils/audio');
-
 Page({
-  data: {
-    statusBarHeight: 20,
-    navBarHeight: 44,
-    mode: 'auto', // auto 自动备份（有云就同步） / local 仅本机
-    cloudOn: false,
-    status: 'off',
-    statusText: '正在检查…',
-    cloudState: 'uninited',
-    cloudReason: '',
-    lastSyncText: '从未同步',
-    dirtyCount: 0,
-    usedKB: 0,
-    bookCount: 0,
-    wordCount: 0,
-    wrongCount: 0,
-    busy: false,
-    confirmShow: false,
-    confirmTitle: '',
-    confirmDesc: '',
-    confirmLocal: 0,
-    confirmCloud: 0,
-    conflictData: null, // 非空表示弹窗处于「两边都有数据」的裁决态
-    envHint: ''
-  },
-
-  onLoad() {
-    const app = getApp();
-    this.setData({
-      statusBarHeight: (app.globalData && app.globalData.statusBarHeight) || 20,
-      navBarHeight: (app.globalData && app.globalData.navBarHeight) || 44
-    });
-    this.unbind = sync.onStatus(this.applyStatus.bind(this));
-    this.refresh();
-  },
-
-  onUnload() {
-    if (this.unbind) this.unbind();
-  },
-
-  onShow() {
-    this.refresh();
-  },
-
-  applyStatus(s) {
-    this.setData({
-      mode: s.mode,
-      cloudOn: s.cloudOn,
-      status: s.status,
-      statusText: this.textOf(s),
-      cloudState: s.cloudState,
-      cloudReason: s.cloudReason,
-      lastSyncText: s.lastSyncAt ? util.fromNow(s.lastSyncAt) : '从未同步',
-      dirtyCount: s.dirtyCount
-    });
-  },
-
-  textOf(s) {
-    if (s.mode === 'local') return '仅保存在本机';
-    if (!s.cloudOn) return '云端暂不可用，已存本机';
-    if (s.status === 'syncing') return '正在同步…';
-    if (s.status === 'unavailable') return '云环境不可用，已转本机保存';
-    if (s.status === 'error') return s.lastError || '同步异常，数据已存本机';
-    if (s.dirtyCount > 0) return s.dirtyCount + ' 项待同步';
-    return '已备份到云端';
-  },
-
+  data: { usedKB: 0, bookCount: 0, wordCount: 0, wrongCount: 0, busy: false },
+  onLoad() { this.refresh(); },
+  onShow() { this.refresh(); },
   refresh() {
     const books = storage.listBooks();
-    let words = 0;
-    books.forEach(function (b) {
-      words += b.count || 0;
-    });
     let usedKB = 0;
-    try {
-      const info = wx.getStorageInfoSync();
-      usedKB = Math.round(info.currentSize || 0);
-    } catch (e) {
-      usedKB = 0;
-    }
-    let envHint = '';
-    if (!cloud.CLOUD_ENV) {
-      envHint = '尚未配置云环境 ID，自动备份暂不可用（数据仍安全存在本机）';
-    }
-    this.applyStatus(sync.statusSnapshot());
-    this.setData({
-      bookCount: books.length,
-      wordCount: words,
-      usedKB: usedKB,
-      wrongCount: storage.totalWrongCount(),
-      envHint: envHint
-    });
+    try { usedKB = wx.getStorageInfoSync().currentSize || 0; } catch (e) {}
+    this.setData({ bookCount: books.length, wordCount: books.reduce((n, b) => n + (b.count || 0), 0), wrongCount: storage.totalWrongCount(), usedKB: usedKB });
   },
-
-  /* ================= 模式切换 ================= */
-
-  pickMode(e) {
-    const target = e.currentTarget.dataset.mode;
+  async run(action) {
     if (this.data.busy) return;
-    if (target === this.data.mode) return;
-    audio.click();
-
-    if (target === 'local') {
-      this.confirm(
-        '切换为「只存本机」',
-        '之后的学习记录只存在这台手机，换手机或清理微信缓存会丢失。云端已存的数据不会被删除。',
-        function () {
-          sync.disableCloud();
-          this.refresh();
-          util.toast('已切换为仅本机保存');
-        }.bind(this)
-      );
-      return;
-    }
-
-    // 切到云：先探查，再决定是否需要用户裁决冲突
     this.setData({ busy: true });
-    util.toast('正在检查云端…');
-    sync
-      .probeCloud()
-      .then((res) => {
-        this.setData({ busy: false });
-        if (!res || !res.ok) {
-          util.toast((res && res.reason) || '云环境不可用');
-          this.refresh();
-          return;
-        }
-        if (res.localCount === 0) {
-          // 本地没数据（新设备）：直接以云端为准
-          this.runEnable('keep-cloud');
-          return;
-        }
-        if (res.cloudCount === 0) {
-          // 云端空：直接上传本地
-          this.runEnable('keep-local');
-          return;
-        }
-        // 两端都有：让用户裁决
-        this.setData({
-          confirmShow: true,
-          confirmTitle: '两边都有数据',
-          confirmDesc: '选择要以哪一边为准。选错会覆盖另一边，建议保留数据更全的一侧。',
-          confirmLocal: res.localCount,
-          confirmCloud: res.cloudCount,
-          conflictData: res.data
-        });
-      })
-      .catch(() => {
-        this.setData({ busy: false });
-        util.toast('检查云端失败');
-      });
+    try { await action(); }
+    catch (e) { wx.showModal({ title: '操作未完成', content: e.message || e.errMsg || '请稍后重试，本机数据仍保留', showCancel: false }); }
+    finally { this.setData({ busy: false }); this.refresh(); }
   },
-
-  runEnable(strategy, probed) {
-    this.setData({ busy: true, confirmShow: false });
-    util.toast('正在开启自动备份…');
-    sync
-      .enableCloud(strategy, probed)
-      .then((ok) => {
-        this.setData({ busy: false });
-        this.refresh();
-        util.toast(ok ? '已开启自动备份' : '开启失败，已保持本机保存');
-      })
-      .catch(() => {
-        this.setData({ busy: false });
-        util.toast('开启失败');
-      });
+  ask(title, content) {
+    return new Promise((resolve) => wx.showModal({ title: title, content: content, success: (r) => resolve(r.confirm), fail: () => resolve(false) }));
   },
-
-  /* ================= 弹窗 ================= */
-
-  // pendingAction 存放确认后要执行的回调
-  confirm(title, desc, fn) {
-    this.pendingAction = fn;
-    this.setData({
-      confirmShow: true,
-      confirmTitle: title,
-      confirmDesc: desc,
-      confirmLocal: 0,
-      confirmCloud: 0,
-      conflictData: null
+  exportFile() {
+    this.run(async () => {
+      if (typeof wx.shareFileMessage !== 'function') throw new Error('当前微信版本不支持文件分享，请升级微信');
+      const text = JSON.stringify(backup.create());
+      const fileName = '单词备份-' + Date.now() + '.json';
+      const filePath = wx.env.USER_DATA_PATH + '/' + fileName;
+      const fs = wx.getFileSystemManager();
+      try {
+        await new Promise((resolve, reject) => fs.writeFile({ filePath: filePath, data: text, encoding: 'utf8', success: resolve, fail: reject }));
+        await new Promise((resolve, reject) => wx.shareFileMessage({ filePath: filePath, fileName: fileName, success: resolve, fail: (e) => /cancel/.test(e.errMsg || '') ? resolve() : reject(e) }));
+      } finally { fs.unlink({ filePath: filePath, fail() {} }); }
     });
   },
-
-  closeConfirm() {
-    this.pendingAction = null;
-    this.setData({ confirmShow: false, conflictData: null });
-  },
-
-  onConfirmOk() {
-    audio.click();
-    if (this.data.conflictData) {
-      // 冲突裁决：默认合并
-      this.runEnable('merge', this.data.conflictData);
-      return;
-    }
-    const fn = this.pendingAction;
-    this.setData({ confirmShow: false });
-    this.pendingAction = null;
-    if (fn) fn();
-  },
-
-  useLocal() {
-    audio.click();
-    if (this.data.conflictData) this.runEnable('keep-local', this.data.conflictData);
-  },
-
-  useCloud() {
-    audio.click();
-    if (this.data.conflictData) this.runEnable('keep-cloud', this.data.conflictData);
-  },
-
-  /* ================= 操作 ================= */
-
-  syncNow() {
-    if (this.data.mode === 'local' || !this.data.cloudOn) {
-      util.toast('当前未开启云端备份');
-      return;
-    }
-    audio.click();
-    this.setData({ busy: true });
-    sync.syncNow().then(() => {
-      this.setData({ busy: false });
-      this.refresh();
+  importFile() {
+    this.run(async () => {
+      await getApp().requirePrivacy();
+      const file = await new Promise((resolve, reject) => wx.chooseMessageFile({ count: 1, type: 'file', extension: ['json'], success: (res) => resolve(res.tempFiles && res.tempFiles[0]), fail: (e) => /cancel/.test(e.errMsg || '') ? resolve(null) : reject(e) }));
+      if (!file) return;
+      if (file.size > 8 * 1024 * 1024) throw new Error('备份文件超过 8MB');
+      const text = await new Promise((resolve, reject) => wx.getFileSystemManager().readFile({ filePath: file.path, encoding: 'utf8', success: (r) => resolve(r.data), fail: reject }));
+      await this.confirmRestore(backup.parse(text));
     });
   },
-
-  clearCloud() {
-    if (this.data.mode === 'local' || !this.data.cloudOn) {
-      util.toast('当前未开启云端备份');
-      return;
-    }
-    this.confirm(
-      '删除云端数据',
-      '会清空云端的全部词库与学习记录，本机数据不受影响。删除后无法恢复。',
-      () => {
-        util.toast('正在删除…');
-        cloud.clearAll().then((ok) => {
-          this.refresh();
-          util.toast(ok ? '云端数据已清空' : '删除失败');
-        });
-      }
-    );
+  async confirmRestore(data) {
+    backup.validate(data);
+    const words = data.books.reduce((n, b) => n + b.words.length, 0);
+    if (!await this.ask('恢复备份', '备份包含 ' + data.books.length + ' 个词库、' + words + ' 个单词。现有词库保留，备份词库另存为新词库（重复恢复会新增副本）；统计合并，设置使用备份中的值。继续吗？')) return;
+    backup.restore(data);
+    util.toast('备份已恢复');
   },
-
-  noop() {
-    /* 阻止冒泡，点到弹窗本体不关闭 */
+  cloudBackup() {
+    this.run(async () => {
+      if (!await this.ask('手动云端备份', '将上传全部词表、错词、学习记录和设置，并替换上一次手动云备份。平时无需使用，也不会后台上传。继续吗？')) return;
+      await cloud.saveBackup(backup.create());
+      util.toast('云端备份成功');
+    });
   },
-
-  goBack() {
-    audio.click();
-    wx.navigateBack({
-      fail() {
-        wx.switchTab({ url: '/pages/home/home' });
-      }
+  cloudRestore() {
+    this.run(async () => {
+      if (!await this.ask('读取云端备份', '将连接云端读取上一次手动备份，读取后可预览并决定是否恢复。继续吗？')) return;
+      await this.confirmRestore(await cloud.loadBackup());
     });
   }
 });
